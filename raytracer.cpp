@@ -187,8 +187,17 @@ void Raytracer::computeShading( Ray3D& ray ) {
 		// Each lightSource provides its own shading function.
 
 		// Implement shadows here if needed.
+        Ray3D shadowray;
+        shadowray.dir = curLight->light->get_position() - ray.intersection.point;
+        shadowray.origin = ray.intersection.point + 1e-6 * shadowray.dir;
+        shadowray.dir.normalize();
+        traverseScene(_root, shadowray);
+        curLight->light->shade(ray);
 
-		curLight->light->shade(ray);
+        if (!shadowray.intersection.none){
+            ray.col = ray.intersection.mat->ambient;
+        }
+        
 		curLight = curLight->next;
 	}
 }
@@ -223,7 +232,6 @@ Colour Raytracer::shadeRay( Ray3D& ray ) {
 	if (!ray.intersection.none) {
 		computeShading(ray); 
 		col = ray.col;
-        //col = ray.intersection.mat->diffuse;
 	}
 
 	// You'll want to call shadeRay recursively (with a different ray, 
@@ -323,12 +331,12 @@ int main(int argc, char* argv[])
 
 	// Render the scene, feel free to make the image smaller for
 	// testing purposes.	
-	raytracer.render(width, height, eye, view, up, fov, "phong1.bmp");
+	raytracer.render(width, height, eye, view, up, fov, "view1.bmp");
 	
 	// Render it from a different point of view.
 	Point3D eye2(4, 2, 1);
 	Vector3D view2(-4, -2, -6);
-	raytracer.render(width, height, eye2, view2, up, fov, "phong2.bmp");
+	raytracer.render(width, height, eye2, view2, up, fov, "shadow.bmp");
 	
 	return 0;
 }

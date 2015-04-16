@@ -74,11 +74,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "raytracer.cpp"
-            timestampString = "450808834.124173"
+            timestampString = "450875054.596556"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "263"
-            endingLineNumber = "263"
+            startingLineNumber = "271"
+            endingLineNumber = "271"
             landmarkName = "Raytracer::render( int width, int height, Point3D eye, Vector3D view, Vector3D up, double fov, const char* fileName )"
             landmarkType = "5">
          </BreakpointContent>
@@ -90,11 +90,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "raytracer.cpp"
-            timestampString = "450808840.284414"
+            timestampString = "450875054.596556"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "219"
-            endingLineNumber = "219"
+            startingLineNumber = "228"
+            endingLineNumber = "228"
             landmarkName = "Raytracer::shadeRay( Ray3D&amp; ray )"
             landmarkType = "5">
          </BreakpointContent>
