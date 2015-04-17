@@ -223,22 +223,36 @@ void Raytracer::flushPixelBuffer( const char *file_name ) {
 	delete _bbuffer;
 }
 
-Colour Raytracer::shadeRay( Ray3D& ray ) {
+Colour Raytracer::shadeRay( Ray3D& ray,int times) {
 	Colour col(0.0, 0.0, 0.0); 
 	traverseScene(_root, ray); 
 	
 	// Don't bother shading if the ray didn't hit 
 	// anything.
 	if (!ray.intersection.none) {
-		computeShading(ray); 
+            computeShading(ray);
+        if(times < 3 && ray.intersection.mat->reflect_coef != 0){
+            Ray3D reflect_ray;
+            reflect_ray.origin = ray.intersection.point;
+            reflect_ray.dir = ray.dir - (2 * (ray.dir.dot(ray.intersection.normal)) * ray.intersection.normal);
+            reflect_ray.dir.normalize();
+            times = times + 1;
+            Colour refl = shadeRay(reflect_ray,times);
+            //ray.col = (1 - ray.intersection.mat->reflect_coef) * ray.col + ray.intersection.mat->reflect_coef*refl;
+            ray.col = ray.col + ray.intersection.mat->reflect_coef*refl;
+
+        }
+    }
 		col = ray.col;
-	}
+        col.clamp();
 
 	// You'll want to call shadeRay recursively (with a different ray, 
-	// of course) here to implement reflection/refraction effects.  
+	// of course) here to implement reflection/refraction effects.
+    //reflection
 
 	return col; 
-}	
+}
+
 
 void Raytracer::render( int width, int height, Point3D eye, Vector3D view, 
 		Vector3D up, double fov, const char* fileName ) {
@@ -268,7 +282,7 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
             directionW.normalize();
             
             Ray3D ray(originW, directionW);
-			Colour col = shadeRay(ray);
+			Colour col = shadeRay(ray,0);
 
 			_rbuffer[i*width+j] = int(col[0]*255);
 			_gbuffer[i*width+j] = int(col[1]*255);
@@ -304,10 +318,10 @@ int main(int argc, char* argv[])
 	// Defines a material for shading.
 	Material gold( Colour(0.3, 0.3, 0.3), Colour(0.75164, 0.60648, 0.22648), 
 			Colour(0.628281, 0.555802, 0.366065), 
-			51.2 );
+			51.2,0.1 );
 	Material jade( Colour(0, 0, 0), Colour(0.54, 0.89, 0.63), 
 			Colour(0.316228, 0.316228, 0.316228), 
-			12.8 );
+			12.8,0.0);
 
 	// Defines a point light source.
 	raytracer.addLightSource( new PointLight(Point3D(0, 0, 5), 
@@ -331,13 +345,14 @@ int main(int argc, char* argv[])
 
 	// Render the scene, feel free to make the image smaller for
 	// testing purposes.	
-	raytracer.render(width, height, eye, view, up, fov, "view1.bmp");
+	//raytracer.render(width, height, eye, view, up, fov, "reflect.bmp");
 	
 	// Render it from a different point of view.
 	Point3D eye2(4, 2, 1);
 	Vector3D view2(-4, -2, -6);
-	raytracer.render(width, height, eye2, view2, up, fov, "shadow.bmp");
+	raytracer.render(width, height, eye2, view2, up, fov, "qqq4.bmp");
 	
 	return 0;
 }
+
 
