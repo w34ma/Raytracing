@@ -254,12 +254,13 @@ Colour Raytracer::shadeRay( Ray3D& ray,int times) {
 }
 
 
-void Raytracer::render( int width, int height, Point3D eye, Vector3D view, 
+void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 		Vector3D up, double fov, const char* fileName ) {
 	Matrix4x4 viewToWorld;
 	_scrWidth = width;
 	_scrHeight = height;
 	double factor = (double(height)/2)/tan(fov*M_PI/360.0);
+    Colour totalCol(0.0,0.0,0.0);
 
 	initPixelBuffer();
 	viewToWorld = initInvViewMatrix(eye, view, up);
@@ -267,12 +268,16 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
 	// Construct a ray for each pixel.
 	for (int i = 0; i < _scrHeight; i++) {
 		for (int j = 0; j < _scrWidth; j++) {
+            //anti-aliasing, each pixel can have 4 rays, the pixel color determined by avgerage
+            for(double a = i; a < i+1 ; a += 0.5){
+                for(double b = j; b < j+1;b += 0.5){
+
 			// Sets up ray origin and direction in view space, 
 			// image plane is at z = -1.
 			Point3D origin(0, 0, 0);
 			Point3D imagePlane;
-			imagePlane[0] = (-double(width)/2 + 0.5 + j)/factor;
-			imagePlane[1] = (-double(height)/2 + 0.5 + i)/factor;
+			imagePlane[0] = (-double(width)/2 + 0.5 + b)/factor;
+			imagePlane[1] = (-double(height)/2 + 0.5 + a)/factor;
 			imagePlane[2] = -1;
 
 			// TODO: Convert ray to world space and call 
@@ -283,19 +288,48 @@ void Raytracer::render( int width, int height, Point3D eye, Vector3D view,
             
             Ray3D ray(originW, directionW);
 			Colour col = shadeRay(ray,0);
-
-			_rbuffer[i*width+j] = int(col[0]*255);
-			_gbuffer[i*width+j] = int(col[1]*255);
-			_bbuffer[i*width+j] = int(col[2]*255);
-		}
-	}
-
+                    
+            //each ray contributed 0.25 color to the final rending color for the pixel
+            _rbuffer[i*width+j] += int(col[0]*255*0.25);
+            _gbuffer[i*width+j] += int(col[1]*255*0.25);
+            _bbuffer[i*width+j] += int(col[2]*255*0.25);
+                }
+            }
+        }
+    }
 	flushPixelBuffer(fileName);
+    
+    /*********NO anti-aliasing**********/
+    /*	
+     for (int i = 0; i < _scrHeight; i++) {
+        for (int j = 0; j < _scrWidth; j++) {
+            Point3D origin(0, 0, 0);
+            Point3D imagePlane;
+            imagePlane[0] = (-double(width)/2 + 0.5 + j)/factor;
+            imagePlane[1] = (-double(height)/2 + 0.5 + i)/factor;
+            imagePlane[2] = -1;
+     
+            Point3D originW = viewToWorld * imagePlane;
+            Vector3D directionW = viewToWorld * (imagePlane -origin);
+            directionW.normalize();
+     
+            Ray3D ray(originW, directionW);
+            Colour col = shadeRay(ray,0);
+     
+            _rbuffer[i*width+j] = int(col[0]*255);
+            _gbuffer[i*width+j] = int(col[1]*255);
+            _bbuffer[i*width+j] = int(col[2]*255);
+        }
+     }
+     flushPixelBuffer(fileName);*/
+    /*********END no anti-aliasing**********/
+
 }
 
+
 int main(int argc, char* argv[])
-{	
-	// Build your scene and setup your camera here, by calling 
+{
+	// Build your scene and setup your camera here, by calling
 	// functions from Raytracer.  The code here sets up an example
 	// scene and renders it from two different view points, DO NOT
 	// change this if you're just implementing part one of the 
@@ -350,7 +384,7 @@ int main(int argc, char* argv[])
 	// Render it from a different point of view.
 	Point3D eye2(4, 2, 1);
 	Vector3D view2(-4, -2, -6);
-	raytracer.render(width, height, eye2, view2, up, fov, "qqq4.bmp");
+	raytracer.render(width, height, eye2, view2, up, fov, "anti-aliasing.bmp");
 	
 	return 0;
 }
