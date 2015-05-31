@@ -14,8 +14,8 @@ Simple raytracer using c++ in team (with Xu Bing)
   b. Refraction </br>
   c. Anti-aliasing </br>
   d. Additional primitives (Cylinders and cones) </br>
-  5. Texture mapping for Square and Sphere </br>
-  6. Area light sourced (Soft Shadow) </br>
+  e. Texture mapping for Square and Sphere </br>
+  f. Area light sourced (Soft Shadow) </br>
 4. final scence </br>
 ![alt tag](https://github.com/w34ma/Raytracing/blob/final/view5.jpg)</br>
 
